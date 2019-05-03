@@ -10,7 +10,7 @@ import Foundation
 
 struct NetworkClient {
     
-    static let url = URL(string: "https://studentdirectory.vapor.cloud/students")!
+    static let url = URL(string: "https://lambdastudentdirectory.vapor.cloud/students")!
     
     func fetchStudents(completion: @escaping ([Student]?, Error?) -> Void) {
         URLSession.shared.dataTask(with: NetworkClient.url) { (data, _, error) in
