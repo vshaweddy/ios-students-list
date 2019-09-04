@@ -15,10 +15,29 @@ class StudentsViewController: UIViewController {
     @IBOutlet weak var filterSelector: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     
+    private let studentController = StudentController()
+    
+    private var students: [Student] = [] {
+        didSet {
+            updateDataSource()
+        }
+    }
+    
     // MARK: - Properties
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        studentController.loadsFromPersistentScore { students, error in
+            if let error = error {
+                print("Error loading students: \(error)")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.students = students ?? []
+            }
+        }
 
     }
     
@@ -31,17 +50,23 @@ class StudentsViewController: UIViewController {
     }
     
     // MARK: - Private
+    
+    private func updateDataSource() {
+        tableView.reloadData()
+    }
 }
 
 extension StudentsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return students.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "StudentCell", for: indexPath)
         
-        // Configure cell
+        let aStudent = students[indexPath.row]
+        cell.textLabel?.text = aStudent.name
+        cell.detailTextLabel?.text = aStudent.course
         
         return cell
     }
