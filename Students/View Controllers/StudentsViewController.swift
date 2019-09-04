@@ -15,6 +15,8 @@ class StudentsViewController: UIViewController {
     @IBOutlet weak var filterSelector: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     
+    
+    // MARK: - Properties
     private let studentController = StudentController()
     
     private var students: [Student] = [] {
@@ -23,7 +25,11 @@ class StudentsViewController: UIViewController {
         }
     }
     
-    // MARK: - Properties
+    private var filteredAndSortedStudents: [Student] = [] {
+        didSet {
+            tableView.reloadData()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,27 +50,52 @@ class StudentsViewController: UIViewController {
     // MARK: - Action Handlers
     
     @IBAction func sort(_ sender: UISegmentedControl) {
+        updateDataSource()
     }
     
     @IBAction func filter(_ sender: UISegmentedControl) {
+        updateDataSource()
     }
     
     // MARK: - Private
     
     private func updateDataSource() {
-        tableView.reloadData()
+        var updatedStudents: [Student]
+        
+        switch filterSelector.selectedSegmentIndex {
+        case 1: // filter for iOS
+            updatedStudents = students.filter({ (student) -> Bool in
+                return student.course == "iOS"
+            })
+        case 2: // filter for Web
+            updatedStudents = students.filter { $0.course == "Web" }
+        case 3: // filter for UX
+            updatedStudents = students.filter { $0.course == "UX" }
+        default: // filter for none (or if another segment is added, they'd fall in here too
+            updatedStudents = students
+        }
+        
+        if sortSelector.selectedSegmentIndex == 0 {
+            updatedStudents = updatedStudents.sorted { $0.firstName < $1.firstName}
+        } else { // last name sort
+            updatedStudents = updatedStudents.sorted(by: { (lhs, rhs) -> Bool in
+                return lhs.lastName < rhs.lastName
+            })
+        }
+        
+        filteredAndSortedStudents = updatedStudents
     }
 }
 
 extension StudentsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return students.count
+        return filteredAndSortedStudents.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "StudentCell", for: indexPath)
         
-        let aStudent = students[indexPath.row]
+        let aStudent = filteredAndSortedStudents[indexPath.row]
         cell.textLabel?.text = aStudent.name
         cell.detailTextLabel?.text = aStudent.course
         
