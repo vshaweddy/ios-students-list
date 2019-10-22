@@ -10,7 +10,9 @@ import Foundation
 
 class StudentController {
     
+    
     private var persistentFileURL: URL? {
+        // bundling all the compiled code, assets, resources using Bundle -- prepopulating data
         guard let filePath = Bundle.main.path(forResource: "students", ofType: "json") else { return nil }
         return URL(fileURLWithPath: filePath)
     }
